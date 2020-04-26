@@ -18,6 +18,16 @@ spec:
       owner: mtanenbaum
       expiration: 12h 
   nodePools:
+  - name: gpu-worker
+    count: 2
+    machine:
+      rootVolumeSize: 80
+      rootVolumeType: gp2
+      imagefsVolumeEnabled: true
+      imagefsVolumeSize: 160
+      imagefsVolumeType: gp2
+      imagefsVolumeDevice: xvdb
+      type: p2.xlarge
   - name: worker
     count: 6
     machine:
