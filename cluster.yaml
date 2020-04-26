@@ -1,0 +1,166 @@
+kind: ClusterProvisioner
+apiVersion: konvoy.mesosphere.io/v1beta1
+metadata:
+  name: konvoy_v1.5.0-beta.0
+  creationTimestamp: "2020-04-23T12:41:48Z"
+spec:
+  provider: azure
+  azure:
+    location: westus
+    availabilitySet:
+      faultDomainCount: 3
+      updateDomainCount: 3
+    tags:
+      owner: mtanenbaum
+      expiration: 12h
+  nodePools:
+  - name: worker
+    count: 6
+    machine:
+      imageID: OpenLogic:CentOS:7.6:7.6.20190808
+      rootVolumeSize: 80
+      rootVolumeType: Standard_LRS
+      imagefsVolumeEnabled: true
+      imagefsVolumeSize: 160
+      imagefsVolumeType: Standard_LRS
+      type: Standard_D4s_v3
+  - name: control-plane
+    controlPlane: true
+    count: 1 
+    machine:
+      imageID: OpenLogic:CentOS:7.6:7.6.20190808
+      rootVolumeSize: 80
+      rootVolumeType: Standard_LRS
+      imagefsVolumeEnabled: true
+      imagefsVolumeSize: 160
+      imagefsVolumeType: Standard_LRS
+      type: Standard_D4s_v3
+  - name: bastion
+    bastion: true
+    count: 0
+    machine:
+      imageID: OpenLogic:CentOS:7.6:7.6.20190808
+      rootVolumeSize: 40
+      rootVolumeType: Standard_LRS
+      imagefsVolumeEnabled: false
+      type: Standard_D2_v3
+  sshCredentials:
+    user: centos
+    publicKeyFile: konvoy_v1.5.0-beta.0-ssh.pub
+    privateKeyFile: konvoy_v1.5.0-beta.0-ssh.pem
+  version: v1.5.0-beta.0
+---
+kind: ClusterConfiguration
+apiVersion: konvoy.mesosphere.io/v1beta1
+metadata:
+  name: konvoy_v1.5.0-beta.0
+  creationTimestamp: "2020-04-23T12:41:48Z"
+spec:
+  kubernetes:
+    version: 1.16.8
+    networking:
+      podSubnet: 10.0.128.0/18
+      serviceSubnet: 10.0.0.0/18
+      iptables:
+        addDefaultRules: false
+    cloudProvider:
+      provider: azure
+    admissionPlugins:
+      enabled:
+      - AlwaysPullImages
+      - NodeRestriction
+  containerNetworking:
+    calico:
+      version: v3.13.2
+      encapsulation: ""
+      mtu: 1500
+  containerRuntime:
+    containerd:
+      version: 1.2.6
+  osPackages:
+    enableAdditionalRepositories: true
+  nodePools:
+  - name: worker
+  addons:
+  - configRepository: https://github.com/mesosphere/kubernetes-base-addons
+    configVersion: stable-1.16-1.5.0
+    addonsList:
+    - name: azuredisk-csi-driver
+      enabled: true
+    - name: azurediskprovisioner
+      enabled: true
+    - name: cert-manager
+      enabled: true
+    - name: dashboard
+      enabled: true
+    - name: defaultstorageclass-protection
+      enabled: true
+    - name: dex
+      enabled: true
+    - name: dex-k8s-authenticator
+      enabled: true
+    - name: elasticsearch
+      enabled: true
+    - name: elasticsearch-curator
+      enabled: true
+    - name: elasticsearchexporter
+      enabled: true
+    - name: external-dns
+      enabled: false
+    - name: flagger
+      enabled: false
+    - name: fluentbit
+      enabled: true
+    - name: gatekeeper
+      enabled: true
+    - name: istio # Istio is currently in Preview
+      enabled: true 
+    - name: kibana
+      enabled: true
+    - name: konvoyconfig
+      enabled: true
+    - name: kube-oidc-proxy
+      enabled: true
+    - name: localvolumeprovisioner
+      enabled: false
+      values: |
+        # Multiple storage classes can be defined here. This allows to, e.g.,
+        # distinguish between different disk types.
+        # For each entry a storage class '$name' and
+        # a host folder '/mnt/$dirName' will be created. Volumes mounted to this
+        # folder are made available in the storage class.
+        storageclasses:
+          - name: localvolumeprovisioner
+            dirName: disks
+            isDefault: false
+            reclaimPolicy: Delete
+            volumeBindingMode: WaitForFirstConsumer
+    - name: metallb
+      enabled: false
+    - name: nvidia
+      enabled: false
+    - name: opsportal
+      enabled: true
+    - name: prometheus
+      enabled: true
+    - name: prometheusadapter
+      enabled: true
+    - name: reloader
+      enabled: true
+    - name: traefik
+      enabled: true
+    - name: traefik-forward-auth
+      enabled: true
+    - name: velero
+      enabled: true
+  - configRepository: https://github.com/mesosphere/kubeaddons-dispatch
+    configVersion: stable-1.16-1.0.1
+    addonsList:
+    - name: dispatch
+      enabled: false
+  - configRepository: https://github.com/mesosphere/kubeaddons-kommander
+    configVersion: testing-1.16-1.1.0-beta.2 
+    addonsList:
+    - name: kommander
+      enabled: true
+  version: v1.5.0-beta.0
