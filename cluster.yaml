@@ -149,7 +149,7 @@ spec:
             reclaimPolicy: Delete
             volumeBindingMode: WaitForFirstConsumer
     - name: nvidia
-      enabled: true 
+      enabled: false 
     - name: opsportal
       enabled: true
     - name: prometheus
