@@ -1,70 +1,76 @@
 kind: ClusterProvisioner
 apiVersion: konvoy.mesosphere.io/v1beta1
 metadata:
-  name: konvoy_v1.5.0-beta.0
-  creationTimestamp: "2020-04-23T12:41:48Z"
+  name: eks-kubeflow-demo
+  creationTimestamp: "2020-04-26T16:23:46Z"
 spec:
-  provider: azure
-  azure:
-    location: westus
-    availabilitySet:
-      faultDomainCount: 3
-      updateDomainCount: 3
+  provider: aws
+  aws:
+    region: us-east-1
+    vpc:
+      overrideDefaultRouteTable: true
+      enableInternetGateway: true
+      enableVPCEndpoints: false
+    availabilityZones:
+    - us-east-1a
+    - us-east-1b  
     tags:
       owner: mtanenbaum
-      expiration: 12h
+      expiration: 12h 
   nodePools:
   - name: worker
     count: 6
     machine:
-      imageID: OpenLogic:CentOS:7.6:7.6.20190808
+      imageID: ami-02eac2c0129f6376b 
       rootVolumeSize: 80
-      rootVolumeType: Standard_LRS
+      rootVolumeType: gp2
       imagefsVolumeEnabled: true
       imagefsVolumeSize: 160
-      imagefsVolumeType: Standard_LRS
-      type: Standard_D4s_v3
+      imagefsVolumeType: gp2
+      imagefsVolumeDevice: xvdb
+      type: m5.2xlarge
   - name: control-plane
     controlPlane: true
     count: 1 
     machine:
-      imageID: OpenLogic:CentOS:7.6:7.6.20190808
+      imageID: ami-02eac2c0129f6376b 
       rootVolumeSize: 80
-      rootVolumeType: Standard_LRS
+      rootVolumeType: io1
+      rootVolumeIOPS: 1000
       imagefsVolumeEnabled: true
       imagefsVolumeSize: 160
-      imagefsVolumeType: Standard_LRS
-      type: Standard_D4s_v3
+      imagefsVolumeType: gp2
+      imagefsVolumeDevice: xvdb
+      type: m5.xlarge
   - name: bastion
     bastion: true
     count: 0
     machine:
-      imageID: OpenLogic:CentOS:7.6:7.6.20190808
-      rootVolumeSize: 40
-      rootVolumeType: Standard_LRS
+      imageID: ami-01ed306a12b7d1c96
+      rootVolumeSize: 10
+      rootVolumeType: gp2
       imagefsVolumeEnabled: false
-      type: Standard_D2_v3
+      type: m5.large
   sshCredentials:
     user: centos
-    publicKeyFile: konvoy_v1.5.0-beta.0-ssh.pub
-    privateKeyFile: konvoy_v1.5.0-beta.0-ssh.pem
+    publicKeyFile: eks-kubeflow-demo-ssh.pub
+    privateKeyFile: eks-kubeflow-demo-ssh.pem
   version: v1.5.0-beta.0
 ---
 kind: ClusterConfiguration
 apiVersion: konvoy.mesosphere.io/v1beta1
 metadata:
-  name: konvoy_v1.5.0-beta.0
-  creationTimestamp: "2020-04-23T12:41:48Z"
+  name: eks-kubeflow-demo
 spec:
   kubernetes:
     version: 1.16.8
     networking:
-      podSubnet: 10.0.128.0/18
+      podSubnet: 192.168.0.0/16
       serviceSubnet: 10.0.0.0/18
       iptables:
         addDefaultRules: false
     cloudProvider:
-      provider: azure
+      provider: aws
     admissionPlugins:
       enabled:
       - AlwaysPullImages
@@ -72,8 +78,8 @@ spec:
   containerNetworking:
     calico:
       version: v3.13.2
-      encapsulation: ""
-      mtu: 1500
+      encapsulation: ipip
+      mtu: 1480
   containerRuntime:
     containerd:
       version: 1.2.6
@@ -85,10 +91,13 @@ spec:
   - configRepository: https://github.com/mesosphere/kubernetes-base-addons
     configVersion: stable-1.16-1.5.0
     addonsList:
-    - name: azuredisk-csi-driver
+    - name: awsebscsiprovisioner
       enabled: true
-    - name: azurediskprovisioner
-      enabled: true
+    - name: awsebsprovisioner
+      enabled: false
+      values: |
+        storageclass:
+          isDefault: false
     - name: cert-manager
       enabled: true
     - name: dashboard
@@ -106,7 +115,11 @@ spec:
     - name: elasticsearchexporter
       enabled: true
     - name: external-dns
-      enabled: false
+      enabled: true
+      values: |
+        aws:
+          region:
+        domainFilters: []
     - name: flagger
       enabled: false
     - name: fluentbit
@@ -135,10 +148,8 @@ spec:
             isDefault: false
             reclaimPolicy: Delete
             volumeBindingMode: WaitForFirstConsumer
-    - name: metallb
-      enabled: false
     - name: nvidia
-      enabled: false
+      enabled: true 
     - name: opsportal
       enabled: true
     - name: prometheus
@@ -159,7 +170,7 @@ spec:
     - name: dispatch
       enabled: false
   - configRepository: https://github.com/mesosphere/kubeaddons-kommander
-    configVersion: testing-1.16-1.1.0-beta.2 
+    configVersion: stable-1.16-1.1.0-beta.1
     addonsList:
     - name: kommander
       enabled: true
