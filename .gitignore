@@ -1,0 +1,9 @@
+
+*.log
+runs/*
+state/*
+konvoy
+konvoy-preflight
+*.pem
+*.pub
+kommander-cluster-admin-config
