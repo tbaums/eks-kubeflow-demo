@@ -31,7 +31,7 @@ spec:
       type: m5.2xlarge
   - name: control-plane
     controlPlane: true
-    count: 1 
+    count: 3 
     machine:
       imageID: ami-02eac2c0129f6376b 
       rootVolumeSize: 80
@@ -127,7 +127,7 @@ spec:
     - name: gatekeeper
       enabled: true
     - name: istio # Istio is currently in Preview
-      enabled: true 
+      enabled: false 
     - name: kibana
       enabled: true
     - name: konvoyconfig
