@@ -157,10 +157,14 @@ EOF
 - Deploy Zookeeper, Kafka, and Spark from catalog
     - Reserve Cassandra for live deployment during demo
 - Create example secrets and configmaps to show federation
+- Edit `custom-repo.yaml` to point to your project namespace
 - Add custom app to the catalog to show extensibility
     - `kubectl apply -f custom-repo.yaml`
 
 
-
+## Clean up
+- MAKE SURE YOU DETACH YOUR EKS CLUSTERS IN THE KOMMANDER UI BEFORE DELETING
+- Delete eks clusters
+    - `eksctl delete cluster --name ${MY_NAME}-<number of cluster to delete>  --region us-east-1`
 
 

@@ -2,7 +2,7 @@ apiVersion: kubeaddons.mesosphere.io/v1beta1
 kind: AddonRepository
 metadata:
   name: custom-repo
-  namespace: test-5dscj-txlbj 
+  namespace: test-fszwb-9gv8z 
 spec:
   url: https://github.com/tbaums/kubeaddons-demo
   ref: "master"
