@@ -47,7 +47,7 @@ metadata:
     name: ${MY_NAME}-1
     region: us-east-1
     version: "1.15"
-managedNodeGroups:
+nodeGroups:
   - name: workers
     instanceType: m5.2xlarge
     desiredCapacity: 5
@@ -64,7 +64,7 @@ metadata:
     name: ${MY_NAME}-2
     region: us-east-1
     version: "1.15"
-managedNodeGroups:
+nodeGroups:
   - name: workers
     instanceType: m5.2xlarge
     desiredCapacity: 5
@@ -81,7 +81,7 @@ metadata:
     name: ${MY_NAME}-3
     region: us-east-1
     version: "1.15"
-managedNodeGroups:
+nodeGroups:
   - name: workers
     instanceType: m5.2xlarge
     desiredCapacity: 5
